@@ -11,6 +11,7 @@ module Fluent
 
     config_param :column_names, :string
     config_param :key_names, :string, default: nil
+    config_param :json_key_names, :string, default: nil
     config_param :table, :string
 
     config_param :on_duplicate_key_update, :bool, default: false
@@ -46,6 +47,7 @@ module Fluent
 
       @column_names = @column_names.split(',')
       @key_names = @key_names.nil? ? @column_names : @key_names.split(',')
+      @json_key_names = @json_key_names.split(',') if @json_key_names
     end
 
     def start
@@ -111,6 +113,10 @@ module Fluent
               value = record[key]
             else
               value = record[key].slice(0, @max_lengths[i])
+            end
+
+            if @json_key_names && @json_key_names.include?(key)
+              value = value.to_json
             end
           end
           values << value
